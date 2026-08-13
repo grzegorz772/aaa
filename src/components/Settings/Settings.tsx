@@ -8,7 +8,7 @@ import { Loader2, Database, Brain, Trash2, PowerOff } from 'lucide-react';
 interface SettingsProps {
   settings: AppSettings;
   onUpdateSettings: (s: AppSettings) => void;
-  onCheckObsidian: () => void;
+  onCheckObsidian: () => Promise<any>;
 }
 
 export function Settings({ settings, onUpdateSettings, onCheckObsidian }: SettingsProps) {
@@ -20,6 +20,7 @@ export function Settings({ settings, onUpdateSettings, onCheckObsidian }: Settin
   const [geminiApiKey, setGeminiApiKey] = useState(settings.geminiApiKey || '');
   const [geminiModel, setGeminiModel] = useState(settings.geminiModel || 'gemini-3.6-flash');
   const [isChecking, setIsChecking] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState<{ connected?: boolean; message?: string } | null>(null);
   const [engineState, setEngineState] = useState(localAIEngine.getState());
 
   useEffect(() => {
@@ -51,7 +52,11 @@ export function Settings({ settings, onUpdateSettings, onCheckObsidian }: Settin
     onUpdateSettings(s);
     
     setIsChecking(true);
-    await onCheckObsidian();
+    setConnectionStatus(null);
+    const result = await onCheckObsidian();
+    if (result) {
+      setConnectionStatus(result);
+    }
     setIsChecking(false);
   }
 
@@ -208,15 +213,30 @@ export function Settings({ settings, onUpdateSettings, onCheckObsidian }: Settin
               className="w-full bg-[#151619] border border-[#2A2B2F] rounded-lg px-4 py-2.5 text-sm text-[#E0E0E0] focus:outline-none focus:border-indigo-500/50 transition-colors"
             />
           </div>
-          <div className="pt-2">
+          <div className="pt-2 flex flex-col gap-3">
             <button 
               onClick={handleSaveObsidian}
               disabled={isChecking}
-              className="px-4 py-2 bg-[#202124] border border-[#3A3B3F] hover:bg-[#2A2B2F] text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+              className="px-4 py-2 bg-[#202124] border border-[#3A3B3F] hover:bg-[#2A2B2F] text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2 self-start"
             >
               {isChecking && <Loader2 size={14} className="animate-spin" />}
               Save & Check Connection
             </button>
+
+            {connectionStatus && (
+              <div
+                className={`p-3.5 rounded-lg border text-xs leading-relaxed ${
+                  connectionStatus.connected
+                    ? 'bg-green-950/30 border-green-800/50 text-green-300'
+                    : 'bg-amber-950/30 border-amber-800/50 text-amber-200'
+                }`}
+              >
+                <div className="font-semibold mb-1">
+                  {connectionStatus.connected ? '✓ Connected' : '⚠ Connection Info'}
+                </div>
+                {connectionStatus.message}
+              </div>
+            )}
           </div>
         </div>
       </section>

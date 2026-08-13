@@ -36,14 +36,23 @@ export class ObsidianService {
     return response;
   }
 
-  async checkConnection(): Promise<boolean> {
+  async checkConnection(): Promise<{ connected: boolean; message: string }> {
+    if (!this.url || !this.key) {
+      return { connected: false, message: 'Obsidian API URL or Key is not configured.' };
+    }
     try {
       const res = await this.fetchApi('/');
       const data = await res.json();
-      return data.status === 'OK';
-    } catch (e) {
-      console.error('Connection check failed:', e);
-      return false;
+      if (data && data.status === 'OK') {
+        return { connected: true, message: 'Successfully connected to Obsidian Local REST API.' };
+      }
+      return { connected: false, message: `Obsidian responded with unexpected status: ${JSON.stringify(data)}` };
+    } catch (e: any) {
+      const isFetchFailed = e?.message?.includes('Failed to fetch') || e?.name === 'TypeError';
+      const hint = isFetchFailed
+        ? 'Could not connect to localhost. Ensure Obsidian is open with "Local REST API" plugin enabled. If in a web browser, open the desktop .exe app or accept self-signed HTTPS certificates.'
+        : e.message || 'Unknown error connecting to Obsidian.';
+      return { connected: false, message: hint };
     }
   }
 

@@ -27,7 +27,7 @@ export function AppLayout() {
     storage.getSettings().then(s => {
       setSettings(s);
       obsidianService.updateConfig(s);
-      obsidianService.checkConnection().then(setObsidianStatus);
+      obsidianService.checkConnection().then(res => setObsidianStatus(res.connected));
     });
 
     localAIEngine.setListener((state) => {
@@ -74,7 +74,7 @@ export function AppLayout() {
           {activeTab === 'chat' && <ChatUI />}
           {activeTab === 'vault' && <VaultExplorer />}
           {activeTab === 'search' && <SearchUI />}
-          {activeTab === 'settings' && <Settings settings={settings} onUpdateSettings={setSettings} onCheckObsidian={() => obsidianService.checkConnection().then(setObsidianStatus)} />}
+          {activeTab === 'settings' && <Settings settings={settings} onUpdateSettings={setSettings} onCheckObsidian={async () => { const res = await obsidianService.checkConnection(); setObsidianStatus(res.connected); return res; }} />}
           {activeTab === 'diagnostics' && <Diagnostics gpuStatus={gpuStatus} />}
         </div>
       </main>
