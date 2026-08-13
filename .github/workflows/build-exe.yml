@@ -24,8 +24,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm install --force
-          npm install @rollup/rollup-win32-x64-msvc lightningcss-win32-x64-msvc --no-save
+          if (Test-Path package-lock.json) { Remove-Item package-lock.json }
+          npm install
 
       - name: Build Web App & Windows Executable
         run: npm run electron:build
