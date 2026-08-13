@@ -1,0 +1,6 @@
+# Force binary files to be treated as binary (prevent line ending normalization/corruption)
+*.png binary
+*.ico binary
+*.icns binary
+*.jpg binary
+*.jpeg binary

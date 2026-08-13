@@ -34,9 +34,6 @@ jobs:
           if (Test-Path package-lock.json) { Remove-Item package-lock.json }
           npm install
 
-      - name: Regenerate compliant icons
-        run: npx tauri icon src-tauri/icons/icon.png
-
       - name: Build Web App & Windows Executable (Tauri)
         run: npm run tauri:build
 
