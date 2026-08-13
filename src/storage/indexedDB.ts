@@ -43,6 +43,9 @@ export const storage = {
       obsidianApiUrl: 'https://127.0.0.1:27124',
       obsidianApiKey: '',
       selectedModelId: 'Qwen2.5-3B-Instruct-q4f16_1-MLC',
+      aiProvider: 'webgpu',
+      geminiApiKey: '',
+      geminiModel: 'gemini-3.6-flash',
     };
   },
   

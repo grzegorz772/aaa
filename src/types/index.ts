@@ -27,6 +27,9 @@ export interface AppSettings {
   obsidianApiUrl: string;
   obsidianApiKey: string;
   selectedModelId: string;
+  aiProvider?: 'webgpu' | 'gemini';
+  geminiApiKey?: string;
+  geminiModel?: string;
 }
 
 export interface VaultNode {

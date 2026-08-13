@@ -2,6 +2,8 @@ import { localAIEngine } from './webllm';
 import { obsidianService } from '../obsidian';
 import { obsidianTools } from '../../tools/obsidianTools';
 import { ChatMessage } from '../../types';
+import { storage } from '../../storage/indexedDB';
+import { runGeminiAgent } from '../geminiAgent';
 
 const MAX_TOOL_CALLS = 10;
 
@@ -13,9 +15,17 @@ export interface AgentContext {
 
 export class LocalAgent {
   async run(context: AgentContext) {
+    const settings = await storage.getSettings();
+
+    if (settings.aiProvider === 'gemini') {
+      const apiKey = settings.geminiApiKey || '';
+      const model = settings.geminiModel || 'gemini-3.6-flash';
+      return await runGeminiAgent(apiKey, model, context);
+    }
+
     const engine = localAIEngine.getEngine();
     if (!engine) {
-      throw new Error("AI engine is not loaded.");
+      throw new Error("AI engine is not loaded. Load a model in Settings or switch to Gemini API.");
     }
 
     let iterations = 0;

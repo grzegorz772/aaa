@@ -52,10 +52,17 @@ export function AppLayout() {
               <div className={`w-2 h-2 rounded-full ${gpuStatus ? 'bg-green-500' : 'bg-red-500'}`} />
               WebGPU: {gpuStatus ? 'Active' : 'Offline'}
             </div>
-            <div className={`flex items-center gap-1.5 px-3 py-1 bg-[#202124] border border-[#2A2B2F] rounded-full text-xs font-bold uppercase tracking-tight ${aiStatus.includes('ready') ? 'text-indigo-400' : 'text-yellow-400'}`}>
-              <div className={`w-2 h-2 rounded-full ${aiStatus.includes('ready') ? 'bg-indigo-500' : 'bg-yellow-500'}`} />
-              AI: {aiStatus.includes('ready') ? `${settings.selectedModelId} loaded` : aiStatus}
-            </div>
+            {settings.aiProvider === 'gemini' ? (
+              <div className="flex items-center gap-1.5 px-3 py-1 bg-[#202124] border border-[#2A2B2F] rounded-full text-xs font-bold uppercase tracking-tight text-indigo-400">
+                <div className="w-2 h-2 rounded-full bg-indigo-500" />
+                Gemini API: {settings.geminiModel || 'gemini-3.6-flash'}
+              </div>
+            ) : (
+              <div className={`flex items-center gap-1.5 px-3 py-1 bg-[#202124] border border-[#2A2B2F] rounded-full text-xs font-bold uppercase tracking-tight ${aiStatus.includes('ready') ? 'text-indigo-400' : 'text-yellow-400'}`}>
+                <div className={`w-2 h-2 rounded-full ${aiStatus.includes('ready') ? 'bg-indigo-500' : 'bg-yellow-500'}`} />
+                AI: {aiStatus.includes('ready') ? `${settings.selectedModelId} loaded` : aiStatus}
+              </div>
+            )}
             <div className={`flex items-center gap-1.5 px-3 py-1 bg-[#202124] border border-[#2A2B2F] rounded-full text-xs font-bold uppercase tracking-tight ${obsidianStatus ? 'text-[#8E9299]' : 'text-red-400'}`}>
               <div className={`w-2 h-2 rounded-full ${obsidianStatus ? 'bg-green-500' : 'bg-red-500'}`} />
               Obsidian: {obsidianStatus ? 'Connected' : 'Offline'}
