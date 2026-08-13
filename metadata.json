@@ -1,0 +1,6 @@
+{
+  "name": "Obsidian Local AI",
+  "description": "Local-first AI desktop client communicating with Obsidian, using WebLLM via WebGPU.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
