@@ -1,6 +1,7 @@
 using System;
 using System.Drawing;
 using System.IO;
+using System.IO.Compression;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -31,10 +32,10 @@ namespace ObsidianLocalAI
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    $"Error starting Obsidian Local AI:\n{ex.Message}\n\nPlease make sure Microsoft Edge WebView2 runtime is available.",
-                    "Obsidian Local AI - Error",
+                    $"Error starting Obsidian Local AI:\n{ex.Message}\n\nMake sure Microsoft Edge WebView2 runtime is available on this system.",
+                    "Obsidian Local AI",
                     MessageBoxButtons.OK,
-                    MessageBoxIcon.Error
+                    MessageBoxIcon.Information
                 );
             }
         }
@@ -46,33 +47,27 @@ namespace ObsidianLocalAI
 
             public MainWindow()
             {
-                Text = "Obsidian Local AI";
-                Size = new Size(1380, 880);
+                Text = "Obsidian Local AI - Local Intelligence Workspace";
+                Size = new Size(1400, 900);
                 MinimumSize = new Size(960, 600);
                 StartPosition = FormStartPosition.CenterScreen;
                 BackColor = Color.FromArgb(18, 18, 20);
 
-                // Try to load embedded or local icon
+                // Set application icon from embedded PNG at runtime without resource compiler
                 try
                 {
-                    var iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "app.ico");
-                    if (File.Exists(iconPath))
+                    var assembly = Assembly.GetExecutingAssembly();
+                    using var iconStream = assembly.GetManifestResourceStream("ObsidianLocalAI.app_icon.png");
+                    if (iconStream != null)
                     {
-                        Icon = new Icon(iconPath);
-                    }
-                    else
-                    {
-                        var assembly = Assembly.GetExecutingAssembly();
-                        using var iconStream = assembly.GetManifestResourceStream("ObsidianLocalAI.app.ico");
-                        if (iconStream != null)
-                        {
-                            Icon = new Icon(iconStream);
-                        }
+                        using var bmp = new Bitmap(iconStream);
+                        var hIcon = bmp.GetHicon();
+                        Icon = Icon.FromHandle(hIcon);
                     }
                 }
                 catch
                 {
-                    // Fallback to default form icon
+                    // Fallback to default
                 }
 
                 // Enable Windows 10/11 Dark Titlebar
@@ -138,8 +133,8 @@ namespace ObsidianLocalAI
                 catch (Exception ex)
                 {
                     MessageBox.Show(
-                        $"Failed to initialize application window:\n\n{ex.Message}\n\nDetails: {ex}",
-                        "Startup Error",
+                        $"Failed to initialize WebView2:\n\n{ex.Message}",
+                        "Obsidian Local AI",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Error
                     );
@@ -148,7 +143,7 @@ namespace ObsidianLocalAI
 
             private string PrepareAssets()
             {
-                // 1. Check if relative ../dist or ./dist folder exists (dev/local build)
+                // 1. Check if relative ../dist or ./dist folder exists (dev / local build)
                 var localDist = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "dist");
                 if (Directory.Exists(localDist) && File.Exists(Path.Combine(localDist, "index.html")))
                 {
@@ -161,38 +156,25 @@ namespace ObsidianLocalAI
                     return parentDist;
                 }
 
-                // 2. Extract embedded resources to LocalApplicationData
+                // 2. Extract embedded app_dist.zip archive to LocalApplicationData
                 var targetDir = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                     "ObsidianLocalAI",
                     "app_assets_v1"
                 );
 
-                Directory.CreateDirectory(targetDir);
-
                 var assembly = Assembly.GetExecutingAssembly();
-                var resourceNames = assembly.GetManifestResourceNames();
-
-                foreach (var resource in resourceNames)
+                using var zipStream = assembly.GetManifestResourceStream("ObsidianLocalAI.app_dist.zip");
+                
+                if (zipStream != null)
                 {
-                    const string prefix = "ObsidianLocalAI.dist.";
-                    if (resource.StartsWith(prefix))
+                    // Check if already extracted or needs extraction
+                    var indexFile = Path.Combine(targetDir, "index.html");
+                    if (!File.Exists(indexFile))
                     {
-                        var relativePath = resource.Substring(prefix.Length);
-                        // Convert dotted resource path back to relative file path if needed
-                        var targetFile = Path.Combine(targetDir, relativePath);
-                        var targetFolder = Path.GetDirectoryName(targetFile);
-                        if (!string.IsNullOrEmpty(targetFolder))
-                        {
-                            Directory.CreateDirectory(targetFolder);
-                        }
-
-                        using var stream = assembly.GetManifestResourceStream(resource);
-                        if (stream != null)
-                        {
-                            using var fs = new FileStream(targetFile, FileMode.Create, FileAccess.Write);
-                            stream.CopyTo(fs);
-                        }
+                        Directory.CreateDirectory(targetDir);
+                        using var archive = new ZipArchive(zipStream, ZipArchiveMode.Read);
+                        archive.ExtractToDirectory(targetDir, overwriteFiles: true);
                     }
                 }
 

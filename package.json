@@ -6,9 +6,10 @@
   "scripts": {
     "dev": "vite --port=3000 --host=0.0.0.0",
     "build": "vite build",
-    "build:exe": "npm run build && dotnet publish desktop-app/ObsidianLocalAI.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o publish/",
+    "prepare:desktop": "node scripts/prepare-desktop.js",
+    "build:exe": "npm run build && npm run prepare:desktop && dotnet publish desktop-app/ObsidianLocalAI.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o publish/",
     "preview": "vite preview",
-    "clean": "rm -rf dist publish",
+    "clean": "rm -rf dist publish desktop-app/app_dist.zip",
     "lint": "tsc --noEmit"
   },
   "dependencies": {
