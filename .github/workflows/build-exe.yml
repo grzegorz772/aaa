@@ -21,26 +21,22 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Install Rust stable
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Rust cache
-        uses: swatinem/rust-cache@v2
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
         with:
-          workspaces: './src-tauri -> target'
+          dotnet-version: '8.0.x'
 
-      - name: Install dependencies
+      - name: Install dependencies & Build Web App
         run: |
-          if (Test-Path package-lock.json) { Remove-Item package-lock.json }
           npm install
+          npm run build
 
-      - name: Build Web App & Windows Executable (Tauri)
-        run: npm run tauri:build
+      - name: Build Standalone Windows Executable (.exe)
+        run: |
+          dotnet publish desktop-app/ObsidianLocalAI.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish/
 
       - name: Upload Windows Executable Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Obsidian-Local-AI-Windows-EXE
-          path: |
-            src-tauri/target/release/bundle/nsis/*.exe
-            src-tauri/target/release/bundle/msi/*.msi
+          path: publish/ObsidianLocalAI.exe

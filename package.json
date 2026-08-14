@@ -6,18 +6,15 @@
   "scripts": {
     "dev": "vite --port=3000 --host=0.0.0.0",
     "build": "vite build",
+    "build:exe": "npm run build && dotnet publish desktop-app/ObsidianLocalAI.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o publish/",
     "preview": "vite preview",
-    "clean": "rm -rf dist",
-    "lint": "tsc --noEmit",
-    "tauri": "tauri",
-    "tauri:build": "tauri build"
+    "clean": "rm -rf dist publish",
+    "lint": "tsc --noEmit"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
     "@mlc-ai/web-llm": "^0.2.84",
     "@tailwindcss/vite": "^4.1.14",
-    "@tauri-apps/api": "^2.11.1",
-    "@tauri-apps/plugin-http": "^2.5.9",
     "@vitejs/plugin-react": "^5.0.4",
     "clsx": "^2.1.1",
     "dotenv": "^17.2.3",
@@ -32,12 +29,9 @@
     "vite": "^6.2.3"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^2.11.4",
     "@types/express": "^4.17.21",
     "@types/node": "^22.14.0",
     "autoprefixer": "^10.4.21",
-    "electron": "^43.4.0",
-    "electron-builder": "^26.15.3",
     "esbuild": "^0.25.0",
     "tailwindcss": "^4.1.14",
     "tsx": "^4.21.0",
